@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Farewell Memory Board</title>
+  <style>
+    body {
+      background-color: #2e003e; /* dark purple-pink */
+      color: #ffd6f0; /* soft pink */
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #45005a; /* darker pink-purple */
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px #ff69b4aa; /* bright pink glow */
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff66b3; /* bright pink */
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+    }
+
+    input {
+      flex: 1 1 30%;
+      background: #6a0d7a; /* medium dark pink */
+      color: #ffe6f2;
+    }
+
+    input::placeholder {
+      color: #f8d7e7;
+    }
+
+    button {
+      background-color: #ff4da6; /* vivid pink */
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #e63d8f; /* darker pink on hover */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #9f3fa6;
+    }
+
+    th {
+      background-color: #7a1f70; /* dark pink header */
+    }
+
+    button#downloadBtn {
+      width: 100%;
+      font-weight: bold;
+      background-color: #ff99cc;
+      color: #4b0033;
+    }
+
+    button#downloadBtn:hover {
+      background-color: #ff66b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💖 Farewell Memory Board</h1>
+
+    <form id="entryForm">
+      <input type="text" id="name" placeholder="Name" required>
+      <input type="tel" id="phone" placeholder="Phone Number" required>
+      <input type="email" id="gmail" placeholder="Gmail Address" required>
+      <button type="submit">Add Entry</button>
+    </form>
+
+    <table id="entriesTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Gmail</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button id="downloadBtn">⬇️ Download as CSV</button>
+  </div>
+
+  <script>
+    const form = document.getElementById("entryForm");
+    const tableBody = document.querySelector("#entriesTable tbody");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    let entries = JSON.parse(localStorage.getItem("farewellEntries")) || [
+      { name: "Tawfia Miss", phone: "01234567890", gmail: "tawfia@example.com" },
+      { name: "Wasi", phone: "01234567891", gmail: "wasi@example.com" },
+      { name: "Tawfiq", phone: "01234567892", gmail: "tawfiq@example.com" },
+      { name: "Anam", phone: "01234567893", gmail: "anam@example.com" },
+      { name: "Fayiz", phone: "01234567894", gmail: "fayiz@example.com" }
+    ];
+
+    function saveEntries() {
+      localStorage.setItem("farewellEntries", JSON.stringify(entries));
+    }
+
+    function renderEntries() {
+      tableBody.innerHTML = "";
+      entries.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${entry.name}</td>
+          <td>${entry.phone}</td>
+          <td>${entry.gmail}</td>
+          <td>
+            <button onclick="editEntry(${index})">✏️</button>
+            <button onclick="deleteEntry(${index})">🗑️</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const gmail = document.getElementById("gmail").value;
+      entries.push({ name, phone, gmail });
+      saveEntries();
+      renderEntries();
+      form.reset();
+    };
+
+    function deleteEntry(index) {
+      entries.splice(index, 1);
+      saveEntries();
+      renderEntries();
+    }
+
+    function editEntry(index) {
+      const entry = entries[index];
+      document.getElementById("name").value = entry.name;
+      document.getElementById("phone").value = entry.phone;
+      document.getElementById("gmail").value = entry.gmail;
+      deleteEntry(index);
+    }
+
+    downloadBtn.onclick = () => {
+      let csv = "Name,Phone,Gmail\n";
+      entries.forEach(e => {
+        csv += `${e.name},${e.phone},${e.gmail}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "farewell_contacts.csv";
+      link.click();
+    };
+
+    renderEntries();
+  </script>
+</body>
+</html>
